@@ -1,4 +1,4 @@
-FROM heegreis/opencv-ffmpeg:cuda8.0-cudnn7
+FROM heegreis/opencv-ffmpeg:cuda10.0-cudnn7
 # set UTF-8 that can support other language
 ENV LANG C.UTF-8
 
