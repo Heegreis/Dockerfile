@@ -36,4 +36,4 @@ RUN pip3 install https://download.pytorch.org/whl/cu80/torch-0.4.0-cp35-cp35m-li
 # install other python liberary
 RUN pip3 install Pillow
 
-WORKDIR /AACP
+WORKDIR /
