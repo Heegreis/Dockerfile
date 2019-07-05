@@ -1,19 +1,12 @@
-FROM heegreis/openpose
+FROM heegreis/openpose:no-ffmpeg
 # set UTF-8 that can support other language
 ENV LANG C.UTF-8
 
 RUN apt-get update
 WORKDIR /
-# install st-gcn requirements.txt
-RUN pip3 install https://download.pytorch.org/whl/cu80/torch-0.4.0-cp35-cp35m-linux_x86_64.whl && \
-    pip3 install pyyaml && \
-    pip3 install argparse && \
-    pip3 install h5py && \
-    pip3 install imageio && \
-    pip3 install scikit-video
-
-WORKDIR /
-
+# install tools
+RUN apt-get -y install wget
+# install ffmpeg
 RUN mkdir ffmpeg_sources && \
     cd ffmpeg_sources/ && \
     apt -y  remove ffmpeg x264 libav-tools libvpx-dev libx264-dev && \
@@ -38,16 +31,19 @@ RUN mkdir ffmpeg_sources && \
     wget https://downloads.sourceforge.net/freetype/freetype-2.10.0.tar.bz2 && \
     tar jxvf freetype-2.10.0.tar.bz2 && cd freetype-2.10.0 && \
     ./configure --prefix=/usr --enable-freetype-config --disable-static && make && make install && cd .. && \    
-    
+    export PKG_CONFIG_PATH=/usr/lib/pkgconfig && \
+
     wget https://github.com/fribidi/fribidi/releases/download/v1.0.5/fribidi-1.0.5.tar.bz2 && \
     tar jxvf fribidi-1.0.5.tar.bz2 && cd fribidi-1.0.5 && \
     ./configure --prefix=/usr --disable-docs && make && make install && cd .. && \
     
     wget https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.13.1.tar.bz2 && \
     tar jxvf fontconfig-2.13.1.tar.bz2 && cd fontconfig-2.13.1 && \
+    apt-get -y install uuid-dev gperf && \
     ./configure --prefix=/usr -disable-docs && make && make install && cd .. && \
     
     git clone https://github.com/libass/libass.git && cd libass && \
+    apt-get -y install libtool && \
     sh autogen.sh && \
     ./configure --prefix=/usr --disable-static && make && make install && cd .. \
     export PKG_CONFIG_PATH=/usr/local/ass/lib/pkgconfig:$PKG_CONFIG_PATH && \
@@ -77,3 +73,14 @@ RUN mkdir ffmpeg_sources && \
         --enable-version3 \
         --enable-libxcb && \
     PATH="$HOME/bin:$PATH" make && make install && hash -r
+# install st-gcn requirements.txt
+RUN pip3 install https://download.pytorch.org/whl/cu80/torch-0.4.0-cp35-cp35m-linux_x86_64.whl && \
+    pip3 install pyyaml && \
+    pip3 install argparse && \
+    pip3 install h5py && \
+    pip3 install imageio && \
+    pip3 install scikit-video && \
+    pip3 install opencv-python
+
+WORKDIR /
+# 失敗 無法執行
