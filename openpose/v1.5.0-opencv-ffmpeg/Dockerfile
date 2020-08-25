@@ -31,4 +31,4 @@ RUN cd openpose && mkdir build && cd build && \
 RUN cd openpose/build && make -j`nproc`
 RUN cd openpose && rm -rf models
 COPY models /openpose/models/
-# 失敗，應該掠過暫存，重build一次就可以了
+# 失敗，應該略過暫存，重build一次就可以了
