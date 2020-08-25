@@ -1,39 +1,41 @@
-FROM heegreis/opencv-ffmpeg:cuda10.0-cudnn7
-# set UTF-8 that can support other language
+# stage 1
+FROM openpose:v1.5.0-py3.6 as openpose
+
+# stage 2
+FROM cuda-python:3.6-cuda10.0-cudnn7-runtime as base
+## set UTF-8 that can support other language
 ENV LANG C.UTF-8
 
-RUN apt-get update
-# Openpose Prerequisites
-RUN apt-get -y install build-essential
-RUN apt-get -y install libatlas-base-dev libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-dev protobuf-compiler
-RUN apt-get -y install --no-install-recommends libboost-all-dev
-RUN apt-get -y install libgflags-dev libgoogle-glog-dev liblmdb-dev
-RUN apt-get -y install python3-setuptools python3-dev build-essential
-RUN pip3 install --upgrade numpy protobuf
-RUN apt-get -y install opencl-headers ocl-icd-opencl-dev
-RUN apt-get -y install python3-pip
-RUN apt-get -y install libviennacl-dev
-# Openpose Build
+## copy openpose and install dependency
 WORKDIR /
-RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose && \
-    cd openpose && \
-    git checkout v1.4.0
-RUN cd openpose && mkdir build && cd build && \
-    cmake -DOpenCV_INCLUDE_DIRS=/usr/local/include/opencv2 \
-    -DOpenCV_LIBS_DIR=/usr/local/lib .. && \
-    cmake -DOpenCV_CONFIG_FILE=/usr/local/share/OpenCV/OpenCVConfig.cmake .. && \
-    cmake -DBUILD_PYTHON=ON ..
-RUN cd openpose/build && make -j`nproc`
 
-# install st-gcn
-RUN pip3 install https://download.pytorch.org/whl/cu80/torch-0.4.0-cp35-cp35m-linux_x86_64.whl && \
-    pip3 install pyyaml && \
-    pip3 install argparse && \
-    pip3 install h5py && \
-    pip3 install imageio && \
-    pip3 install scikit-video
+COPY --from=openpose /openpose/build /openpose/build
 
-# install other python liberary
-RUN pip3 install Pillow
+COPY --from=openpose /openpose/models /openpose/models
 
-WORKDIR /
+COPY --from=openpose /openpose/examples/media /openpose/examples/media
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libgflags-dev \
+    libopencv-dev \
+    libgoogle-glog-dev \
+    libboost-all-dev \
+    libprotobuf-dev \
+    libhdf5-serial-dev \
+    libatlas-base-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install opencv-python && \
+## install st-gcn dependency
+    pip install pyyaml \
+    argparse \
+    numpy \
+    h5py \
+    imageio \
+    scikit-video && \
+    # conda install pytorch==1.2.0 torchvision==0.4.0 cudatoolkit=10.0 -c pytorch
+    pip install torch==1.2.0 torchvision==0.4.0
+
+
+WORKDIR /workspace
