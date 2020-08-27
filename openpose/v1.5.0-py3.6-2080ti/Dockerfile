@@ -1,3 +1,4 @@
+# don't build the Dockerfile, because it has to edit file manually
 FROM heegreis/cuda-python:3.6-cuda10.0-cudnn7-devel
 # set UTF-8 that can support other language
 ENV LANG C.UTF-8
@@ -23,6 +24,9 @@ RUN cd openpose && \
     sed -i 's/78287B57CF85FA89C03F1393D368E5B7) # Body (BODY_25)/d41d8cd98f00b204e9800998ecf8427e) # Body (BODY_25)/' CMakeLists.txt && \
     sed -i 's/e747180d728fa4e4418c465828384333) # Face/d41d8cd98f00b204e9800998ecf8427e) # Face/' CMakeLists.txt && \
     sed -i 's/a82cfc3fea7c62f159e11bd3674c1531) # Hand/d41d8cd98f00b204e9800998ecf8427e) # Hand/' CMakeLists.txt
+# delete below line in scripts/ubuntu_deprecated/Makefile.config.Ubuntu16_cuda10.example
+# -gencode arch=compute_30,code=sm_30 \
+# -gencode arch=compute_35,code=sm_35 \
 RUN cd openpose && mkdir build && cd build && \
     cmake -DBUILD_PYTHON=ON ..
 RUN cd openpose/build && make -j`nproc`

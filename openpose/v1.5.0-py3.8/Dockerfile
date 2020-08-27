@@ -1,4 +1,4 @@
-FROM cuda-python:3.8-cuda10.0-cudnn7-devel
+FROM heegreis/cuda-python:3.8-cuda10.0-cudnn7-devel
 # set UTF-8 that can support other language
 ENV LANG C.UTF-8
 

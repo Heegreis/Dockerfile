@@ -1,8 +1,8 @@
 # stage 1
-FROM heegreis/openpose:v1.5.0-py3.6 as openpose
+FROM heegreis/openpose:v1.5.0-py3.6-2080ti as openpose
 
 # stage 2
-FROM cuda-python:3.6-cuda10.0-cudnn7-runtime as base
+FROM heegreis/cuda-python:3.6-cuda10.0-cudnn7-runtime as base
 ## set UTF-8 that can support other language
 ENV LANG C.UTF-8
 
