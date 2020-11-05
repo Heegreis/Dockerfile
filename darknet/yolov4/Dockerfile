@@ -1,34 +1,24 @@
-# 僅有video.py會有只執行1張的狀況
+FROM heegreis/cuda-python:3.6-cuda10.1-cudnn7-devel-ubuntu18.04
 
-# FROM 3.6-cuda10.1-cudnn7-devel-ubuntu18.04
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 # set UTF-8 that can support other language
 ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         wget \
-        # python
-        python3 \
-        python3-dev \
         # opencv dependencies
         cmake \
         build-essential pkg-config libgtk-3-dev \
         libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
         libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
         gfortran openexr libatlas-base-dev \
-        libtbb2 libtbb-dev libdc1394-22-dev
-        #  && \
-    #  rm -rf /var/lib/apt/lists/*
-
-# install python dependencies
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python3 get-pip.py && \
-    rm get-pip.py && \
-    pip3 install numpy
+        libtbb2 libtbb-dev libdc1394-22-dev \
+        && \
+     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
-# WORKDIR /darknet
+
+# use commit 14b196d4f2f73fb2f6f8c4019de9a0de00c5a27e
 RUN git clone https://github.com/AlexeyAB/darknet.git && \
     cd /darknet && \
     git checkout 8297b1be3108f47d82b97d322d5f1aef5150018f && \
@@ -49,18 +39,18 @@ RUN mkdir /opencv_build && cd /opencv_build && \
 RUN cd /opencv_build/opencv && \
     mkdir build && cd build && \
     cmake -D CMAKE_BUILD_TYPE=RELEASE \
-        -D BUILD_PYTHON_SUPPORT=ON \
         -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D INSTALL_C_EXAMPLES=ON \
-        -D INSTALL_PYTHON_EXAMPLES=ON \
         -D OPENCV_GENERATE_PKGCONFIG=ON \
         -D OPENCV_EXTRA_MODULES_PATH=/opencv_build/opencv_contrib/modules \
-        -D BUILD_EXAMPLES=ON \
-        -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
-        -D BUILD_opencv_python3=ON \
-        -D BUILD_opencv_python2=OFF \
+        -D BUILD_EXAMPLES=OFF \
         -D WITH_FFMPEG=ON \
         -D WITH_CUBLAS=ON .. && \
     make -j$(nproc) && \
     make install && \
     ldconfig
+
+RUN cd /darknet && make
+
+RUN pip install opencv-python
+
+WORKDIR /darknet
