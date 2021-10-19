@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+
+  app:
+    image: gui
+    container_name: gui-test
+    environment:
+      - DISPLAY=host.docker.internal:0.0

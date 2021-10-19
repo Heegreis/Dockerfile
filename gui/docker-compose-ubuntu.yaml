@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+
+  app:
+    image: gui
+    container_name: gui-test
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: host
